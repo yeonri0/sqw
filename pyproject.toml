@@ -10,6 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
     "matplotlib>=3.11.2",
     "numpy>=2.4.6",
+    "quimb>=1.15.0",
 ]
 
 [project.scripts]

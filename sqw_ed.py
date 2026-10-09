@@ -1,14 +1,15 @@
 """
-S(q,w) in 1次元 Heisenberg, L = 8 site, Exact Diagonization
-
+S(q,w) in 1次元 Heisenberg, L = 8 site using ED 
 中性子非弾性散乱は、磁性体のスピンの励起を、波数𝑞とエネルギー𝜔ごとに分けて測る。
-測られる量を動的構造因子（dynamical structure factor, DSF）𝑆(𝑞, 𝜔)と呼ぶ。
-𝑆(𝑞, 𝜔)は、位置が𝑟、時刻が𝑡だけ離れた 2 つのスピンの相関関数𝐺(𝑟, 𝑡)の Fourier変換である
-𝐺(𝑟, 𝑡)は、基底状態にスピン演算子を 1 つ掛けた状態Sz c|0> をTEBD で時間発展させ、e^iE0t <0|Snz|𝜑(t)>として求める。
+測られる量を動的構造因子（dynamical structure factor, DSF）S(q,w)と呼ぶ。
+S(q,w)は、位置が𝑟、時刻が𝑡だけ離れた 2 つのスピンの相関関数G(r,t)の Fourier変換である。
 
-鎖の長さは、乱れが端に届く時刻から決める。
-Fourier 変換では時間と距離に窓関数を掛け、和を任意のq, wで評価する。
-分解能は、𝜎𝜔 = 3/tmaxである。
+ED
+│
+├─ H
+├─ ground state |ψ₀⟩
+│
+└─ S(q,ω)
 
 """
 import numpy as np
