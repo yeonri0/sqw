@@ -51,22 +51,21 @@ Calculation flow:
 
 3. Apply a local spin operator at the central site $c$:
 
-   $$
-   |\phi(0)\rangle=S_c^z|\psi_0\rangle
-   $$
+$$
+|\phi(0)\rangle=S_c^z|\psi_0\rangle
+$$
 
 4. Evolve the resulting state in time using TEBD:
 
-   $$
-   |\phi(t)\rangle=e^{-iHt}|\phi(0)\rangle
-   $$
+$$
+|\phi(t)\rangle=e^{-iHt}|\phi(0)\rangle
+$$
 
 5. Calculate the time-dependent spin correlation function:
 
-   $$
-   G(n,c;t)=e^{iE_0t}
-   \langle\psi_0|S_n^z|\phi(t)\rangle
-   $$
+$$
+G(n,c;t)=e^{iE_0t}\langle\psi_0|S_n^z|\phi(t)\rangle
+$$
 
 6. Fourier transform the spatial coordinate to obtain $G(q,t)$.
 
