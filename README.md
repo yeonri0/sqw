@@ -1,6 +1,6 @@
-# Dynamical Structure Factor $S(q,w)$
+# Dynamical Structure Factor $S(q,\omega)$
 
-This repository contains Python codes to calculate the dynamical structure factor $S(q,w)$ of the 1D spin-1/2 Heisenberg model using exact diagonalization (ED) and time-evolving block decimation (TEBD).
+This repository contains Python codes to calculate the dynamical structure factor $S(q,\omega)$ of the 1D spin-1/2 Heisenberg model using exact diagonalization (ED) and time-evolving block decimation (TEBD).
 
 ## Physical Background
 
