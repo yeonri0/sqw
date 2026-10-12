@@ -93,5 +93,6 @@ $$
 ED treats small systems directly, whereas DMRG+TEBD enables simulations of larger chains using MPS. Comparing their results can help assess finite-size effects and validate the TEBD calculation.
 
 
-![Dynamical structure factor S(q, w)](sqw_ed.png)
-![Dynamical structure factor S(q, w)](sqw_tebd.png)
+![Dynamical structure factor S(q, w)](sqw_ed_L8.png)
+![Correlation function G(n, c, t)](correlation_lightcone.png)
+![Dynamical structure factor S(q, w)](sqw_tebd_L64.png)
