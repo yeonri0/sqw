@@ -74,7 +74,7 @@ for it in range(len(times)):
 np.savez("correlation.npz", G=G, times=times, E0=E0)
 
 
-
+import matplotlib.pyplot as plt
 
 # 保存した結果を読み込む、ここからフーリエ変換する
 data = np.load("correlation.npz")
@@ -82,23 +82,44 @@ G = data["G"]
 times = data["times"]
 E0 = float(data["E0"])
 
-# Spatial Fourier transformでG(q,t)を作る
-r = np.arange(L) - c    # G(r,t)に
-R = min(c, L - 1 - c)
-r_pos = r[c + 1 : c + R + 1]
-q_vals = np.linspace(0, np.pi, L)
+# G(r,t) のパワープロット（光円錐）
+r = np.arange(L) - c
+plt.figure(figsize=(8, 6))
+limit = np.max(np.abs(np.real(G)))
+from matplotlib.colors import TwoSlopeNorm
+plt.pcolormesh(
+    r,
+    times,
+    np.real(G).T,
+    shading="auto",
+    cmap="RdBu",
+    norm=TwoSlopeNorm(vmin=-limit, vcenter=0, vmax=limit)
+)
+plt.xlabel(r"$r=n-c$")
+plt.ylabel(r"$tJ$")
+plt.colorbar(label=r"$G(r,t)$")
+plt.xlim(-L // 2, L // 2)
+plt.tight_layout()
+plt.savefig("correlation_lightcone.png", dpi=300, bbox_inches="tight")
+plt.show()
 
+
+
+# Spatial Fourier transformでG(q,t)を作る
+r = np.arange(L) - c
+q_vals = np.linspace(0, 2 * np.pi, 2 * L + 1)
 Gqt = np.zeros((len(q_vals), len(times)), dtype=complex)
 for iq in range(len(q_vals)):
     q = q_vals[iq]
-    Gqt[iq, :] = (G[c, :]+ 2 * np.sum(np.cos(q * r_pos)[:, None] * G[c + 1 : c + R + 1, :],axis=0))
 
+    Gqt[iq, :] = np.sum(np.exp(-1j * q * r[:, None]) * G,axis=0)
 
 # Time Eourier transform
 dt_obs = dt 
+
 # Gaussian window
 sigma_t = t_max / 3
-window = np.exp(- (times**2 / (2 * sigma_t))**2)
+window = np.exp(-times**2 / (2 * sigma_t**2))
 Gqt_windowed = Gqt * window[None, :]
 
 omega_vals = np.linspace(0, 4, 400)
@@ -110,7 +131,7 @@ for iq in range(len(q_vals)):
 
         Sqw[iq, iw] = dt_obs / (2 * np.pi) * (Gqt_windowed[iq, 0] + 2 * np.real(np.sum(Gqt_windowed[iq, 1:]* np.exp(1j * omega * times[1:]))))
 
-import matplotlib.pyplot as plt
+
 iq = np.argmin(np.abs(q_vals - np.pi / 2))
 plt.figure(figsize=(8, 5))
 plt.plot(omega_vals, Sqw[iq, :])
@@ -122,13 +143,13 @@ plt.show()
 
 
 plt.figure(figsize=(8, 5))
-plt.pcolormesh(q_vals, omega_vals, Sqw.T, shading="auto", cmap="inferno")
+plt.pcolormesh(q_vals, omega_vals, Sqw.T, cmap="viridis", shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
 plt.colorbar(label=r"$S^{zz}(q,\omega)$")
-plt.xlim(0, np.pi)
+plt.xlim(0, 2*np.pi)
 plt.xticks([0, np.pi/2, np.pi], [r"$0$", r"${\pi}/{2}$", r"$\pi$"])
 plt.ylim(0, 4)
 plt.tight_layout()
-plt.savefig("sqw_tebd.png", dpi=300, bbox_inches="tight")
+plt.savefig("sqw_tebd_L64.png", dpi=300, bbox_inches="tight")
 plt.show()

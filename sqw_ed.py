@@ -55,6 +55,7 @@ eta = 0.05
 S_q = np.zeros(len(q_values))
 S_qw = np.zeros((len(q_values), len(omega)))
 
+# 時間発展を追わず、各エネルギー固有状態への重なりからスペクトルを直接求める。ただしデルタ関数を Lorentzian で近似。
 for iq, q in enumerate(q_values):
 
     # S_q^z
@@ -77,6 +78,7 @@ for iq, q in enumerate(q_values):
 
     S_qw[iq] = sum(weight[m] * (eta / np.pi/ ((omega - omega_m[m])**2 + eta**2)) for m in range(len(E))) # Lorentzian近似
 
+
 plt.figure(figsize=(7, 5))
 plt.plot(q_values, S_q)
 plt.xlabel(r"$q$")
@@ -90,7 +92,7 @@ plt.savefig("sq_ed.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 plt.figure(figsize=(7, 5))
-plt.pcolormesh(q_values, omega,S_qw.T, shading="auto")
+plt.pcolormesh(q_values, omega,S_qw.T, cmap="viridis",shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega$")
 plt.colorbar(label=r"$S^{zz}(q,\omega)$")
