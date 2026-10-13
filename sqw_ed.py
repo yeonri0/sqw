@@ -88,19 +88,22 @@ plt.xticks(
     [0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi],
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
-plt.savefig("sq_ed.png", dpi=300, bbox_inches="tight")
+plt.tight_layout()
+plt.savefig("sq_ed_L8.png", dpi=300, bbox_inches="tight")
 plt.show()
 
-plt.figure(figsize=(7, 5))
-plt.pcolormesh(q_values, omega,S_qw.T, cmap="turbo",shading="auto")
+plt.figure(figsize=(8, 5))
+plt.pcolormesh(q_values, omega, S_qw.T/np.max(S_qw), cmap="turbo",shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
-plt.colorbar(label=r"$S^{zz}(q,\omega)$")
+cbar = plt.colorbar(label=r"$S^{zz}(q,\omega)$_normalized")
+cbar.set_ticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 plt.xticks(
     [0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi],
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
+plt.ylim(0, 3.5)
 plt.tight_layout()
-plt.ylim(0, 4)
+plt.title("Dynamical structure factor L=8 ED")
 plt.savefig("sqw_ed_L8.png", dpi=300, bbox_inches="tight")
 plt.show()

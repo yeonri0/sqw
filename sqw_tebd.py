@@ -143,16 +143,18 @@ plt.show()
 
 
 plt.figure(figsize=(8, 5))
-plt.pcolormesh(q_vals, omega_vals, Sqw.T, cmap="turbo", shading="auto")
+plt.pcolormesh(q_vals, omega_vals, Sqw.T/np.max(Sqw), cmap="turbo", shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
-plt.colorbar(label=r"$S^{zz}(q,\omega)$")
+cbar = plt.colorbar(label=r"$S^{zz}(q,\omega)$_normalized")
+cbar.set_ticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 plt.xlim(0, 2*np.pi)
 plt.xticks(
     [0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi],
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
-plt.ylim(0, 4)
+plt.ylim(0, 3.5)
 plt.tight_layout()
+plt.title("Dynamical structure factor L=64 TEBD")
 plt.savefig("sqw_tebd_L64.png", dpi=300, bbox_inches="tight")
 plt.show()
