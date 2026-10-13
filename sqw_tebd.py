@@ -39,39 +39,39 @@ t_max = 20
 dt = 0.05
 
 
-# 2サイトDMRG
-dmrg = qtn.DMRG2(H,bond_dims=[40, 60, 80, 100, 120],cutoffs=1e-10)  # DMRG計算を行うためのオブジェクト   # ボンド次元の上限を順番に変える。異なるボンド次元でエネルギーが変わらないかで収束を判定
-dmrg.solve(tol=1e-8,verbosity=1)    # tolは収束判定の許容誤差を指定
+# # 2サイトDMRG
+# dmrg = qtn.DMRG2(H,bond_dims=[40, 60, 80, 100, 120],cutoffs=1e-10)  # DMRG計算を行うためのオブジェクト   # ボンド次元の上限を順番に変える。異なるボンド次元でエネルギーが変わらないかで収束を判定
+# dmrg.solve(tol=1e-8,verbosity=1)    # tolは収束判定の許容誤差を指定
 
-# Ground state
-psi0 = dmrg.state
-E0 = dmrg.energy
-print("Ground-state energy =", E0)
-print("Energy per site      =", E0 / L)
+# # Ground state
+# psi0 = dmrg.state
+# E0 = dmrg.energy
+# print("Ground-state energy =", E0)
+# print("Energy per site      =", E0 / L)
 
 
-# TEBDでG(n,c,t)を求める     15ページ参照
-Sz = qu.spin_operator("z")
-psi_exc = psi0.copy()
-phi_0 = psi_exc.gate_(Sz, where=c, contract=True)       # |φ(0)⟩ = Sᶻc|ψ₀⟩
+# # TEBDでG(n,c,t)を求める     15ページ参照
+# Sz = qu.spin_operator("z")
+# psi_exc = psi0.copy()
+# phi_0 = psi_exc.gate_(Sz, where=c, contract=True)       # |φ(0)⟩ = Sᶻc|ψ₀⟩
 
-H_tebd = qtn.ham_1d_heis(L, j=J, cyclic=False)      # まずは1次元Heisenberg鎖のハミルトニアンを用意
-tebd = qtn.TEBD(phi_0, H_tebd, dt=dt, split_opts={"max_bond": 128, "cutoff": 1e-10}, progbar=True)   # phi0 や H_tebd などを保持し、TEBD計算を行うためのオブジェクト
-times = np.arange(0, t_max + dt, dt)                 # 等間隔の時刻の配列を生成
-states = tebd.at_times(times, order=2)               # 2次のSuzuki-Trotter分解を使って時間発展を近似
+# H_tebd = qtn.ham_1d_heis(L, j=J, cyclic=False)      # まずは1次元Heisenberg鎖のハミルトニアンを用意
+# tebd = qtn.TEBD(phi_0, H_tebd, dt=dt, split_opts={"max_bond": 128, "cutoff": 1e-10}, progbar=True)   # phi0 や H_tebd などを保持し、TEBD計算を行うためのオブジェクト
+# times = np.arange(0, t_max + dt, dt)                 # 等間隔の時刻の配列を生成
+# states = tebd.at_times(times, order=2)               # 2次のSuzuki-Trotter分解を使って時間発展を近似
 
-# 時間ごとにG(n,t)を計算　ただし中心はc = L / 2
-G = np.zeros((L, len(times)), dtype=complex)
-for it in range(len(times)):
-    t = times[it]
-    phi_t = next(states)                                        # |φ(t)⟩ = U(t)|φ(0)⟩
-    for n in range(L):
-        phi_tmp = phi_t.copy()
-        phi_tmp.gate_(Sz, where=n)                              # Sᶻc|φ(t)⟩
-        G[n, it] = np.exp(1j * E0 * t) * (psi0.H @ phi_tmp)     # G(n,c,t) = e^iE0t <psi0| Sᶻc|φ(t)⟩
+# # 時間ごとにG(n,t)を計算　ただし中心はc = L / 2
+# G = np.zeros((L, len(times)), dtype=complex)
+# for it in range(len(times)):
+#     t = times[it]
+#     phi_t = next(states)                                        # |φ(t)⟩ = U(t)|φ(0)⟩
+#     for n in range(L):
+#         phi_tmp = phi_t.copy()
+#         phi_tmp.gate_(Sz, where=n)                              # Sᶻc|φ(t)⟩
+#         G[n, it] = np.exp(1j * E0 * t) * (psi0.H @ phi_tmp)     # G(n,c,t) = e^iE0t <psi0| Sᶻc|φ(t)⟩
 
-# DMRG・TEBDで計算した結果を保存
-np.savez("correlation.npz", G=G, times=times, E0=E0)
+# # DMRG・TEBDで計算した結果を保存
+# np.savez("correlation.npz", G=G, times=times, E0=E0)
 
 
 import matplotlib.pyplot as plt
@@ -143,12 +143,15 @@ plt.show()
 
 
 plt.figure(figsize=(8, 5))
-plt.pcolormesh(q_vals, omega_vals, Sqw.T, cmap="viridis", shading="auto")
+plt.pcolormesh(q_vals, omega_vals, Sqw.T, cmap="turbo", shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
 plt.colorbar(label=r"$S^{zz}(q,\omega)$")
 plt.xlim(0, 2*np.pi)
-plt.xticks([0, np.pi/2, np.pi], [r"$0$", r"${\pi}/{2}$", r"$\pi$"])
+plt.xticks(
+    [0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi],
+    [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
+)
 plt.ylim(0, 4)
 plt.tight_layout()
 plt.savefig("sqw_tebd_L64.png", dpi=300, bbox_inches="tight")

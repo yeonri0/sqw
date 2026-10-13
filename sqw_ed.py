@@ -48,7 +48,7 @@ print("Ground-state energy =", E0)
 
 # S_q^z, S(q)=S_q, S(q,w)=S_qwを作る 11ページ参考
 q_values = np.linspace(0, 2*np.pi, 101)
-omega = np.linspace(0, np.pi * J, 500)
+omega = np.linspace(0, 4 * J, 500)
 
 eta = 0.05
 
@@ -92,14 +92,15 @@ plt.savefig("sq_ed.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 plt.figure(figsize=(7, 5))
-plt.pcolormesh(q_values, omega,S_qw.T, cmap="viridis",shading="auto")
+plt.pcolormesh(q_values, omega,S_qw.T, cmap="turbo",shading="auto")
 plt.xlabel(r"$q$")
-plt.ylabel(r"$\omega$")
+plt.ylabel(r"$\omega/J$")
 plt.colorbar(label=r"$S^{zz}(q,\omega)$")
-
 plt.xticks(
     [0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi],
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
-plt.savefig("sqw_ed.png", dpi=300, bbox_inches="tight")
+plt.tight_layout()
+plt.ylim(0, 4)
+plt.savefig("sqw_ed_L8.png", dpi=300, bbox_inches="tight")
 plt.show()
