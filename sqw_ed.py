@@ -16,6 +16,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 from functools import reduce
 
+plt.rcParams.update({
+    "axes.labelsize": 16,    # x軸・y軸のラベル
+    "xtick.labelsize": 14,   # x軸の目盛り
+    "ytick.labelsize": 14,   # y軸の目盛り
+    "axes.titlesize": 14,    # グラフタイトル
+    "legend.fontsize": 12,   # 凡例
+    "figure.titlesize": 14,  # Figure全体のタイトル
+})
+
 up = np.array([1, 0], dtype=complex)  # |↑⟩
 dn = np.array([0, 1], dtype=complex)  # |↓⟩
 
@@ -93,16 +102,20 @@ plt.savefig("sq_ed_L8.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 plt.figure(figsize=(8, 5))
-plt.pcolormesh(q_values, omega, S_qw.T/np.max(S_qw), cmap="turbo",shading="auto")
+c =plt.pcolormesh(q_values, omega, S_qw.T/np.max(S_qw), cmap="turbo",shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
-cbar = plt.colorbar(label=r"$S^{zz}(q,\omega)$_normalized")
+cbar = plt.colorbar(c, label=r"$S^{zz}(q,\omega)$ normalized")
+cbar.set_label(r"$S^{zz}(q,\omega)$ normalized", fontsize=16)
+c.set_clim(0, 1)
 cbar.set_ticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+cbar.ax.tick_params(labelsize=12)
+plt.xlim(0, 2*np.pi)
 plt.xticks(
-    [0, np.pi/2, np.pi, 3*np.pi/2, 2*np.pi],
+    [0, np.pi / 2, np.pi, 3 * np.pi / 2, 2 * np.pi],
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
-plt.ylim(0, 3.5)
+plt.ylim(0.0, 3.5)
 plt.tight_layout()
 plt.title("Dynamical structure factor L=8 ED")
 plt.savefig("sqw_ed_L8.png", dpi=300, bbox_inches="tight")
