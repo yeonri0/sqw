@@ -95,4 +95,4 @@ ED treats small systems directly, whereas DMRG+TEBD enables simulations of large
 
 ![Dynamical structure factor S(q, w)](sqw_ed_L10.png)
 ![Correlation function G(n, c, t)](correlation_lightcone_L64.png)
-![Dynamical structure factor S(q, w)](sqw_tebd_L64, maxbond=128, tmax=60, dt=0.06.png)
+![Dynamical structure factor S(q, w)](sqw_tebd_L64_maxbond128_tmax60_dt0.06.png)
