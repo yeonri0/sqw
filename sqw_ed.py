@@ -41,11 +41,16 @@ def op(A, i, N):
 
 
 # Heisenberg Hamiltonian
-L = 8
+L = 10
 J = 1.0
 H = np.zeros((2**L, 2**L), dtype=complex)
-for i in range(L - 1):
-    H += J * (op(Sx, i, L) @ op(Sx, i + 1, L)+ op(Sy, i, L) @ op(Sy, i + 1, L)+ op(Sz, i, L) @ op(Sz, i + 1, L))
+
+for i in range(1, L):
+    H += J * (
+        op(Sx, i, L) @ op(Sx, i + 1, L)
+        + op(Sy, i, L) @ op(Sy, i + 1, L)
+        + op(Sz, i, L) @ op(Sz, i + 1, L)
+    )
 
 # Hamiltonianを対角化
 E, V = np.linalg.eigh(H)
@@ -53,6 +58,7 @@ E, V = np.linalg.eigh(H)
 # 基底状態
 E0 = E[0]
 psi0 = V[:, 0]
+
 print("Ground-state energy =", E0)
 
 # S_q^z, S(q)=S_q, S(q,w)=S_qwを作る 11ページ参考
@@ -98,10 +104,16 @@ plt.xticks(
     [r"$0$", r"$\pi/2$", r"$\pi$", r"$3\pi/2$", r"$2\pi$"]
 )
 plt.tight_layout()
-plt.savefig("sq_ed_L8.png", dpi=300, bbox_inches="tight")
+plt.savefig("sq_ed_L10.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 plt.figure(figsize=(8, 5))
+q_exact = np.linspace(0, 2 * np.pi, 500)
+omega_exact1 = np.pi * J * np.abs(np.sin(q_exact / 2))
+omega_exact2 = np.pi * J / 2 * np.abs(np.sin(q_exact))
+plt.plot(q_exact,omega_exact1, "b-", linewidth=1.8, label=r"$\omega_{\mathrm{U}}(q)=\pi J|sin\frac{q}{2}|$")
+plt.plot(q_exact,omega_exact2, "y-", linewidth=1.8, label=r"$\omega_{\mathrm{L}}(q)=\frac{\pi J}{2}|\sin q|$")
+plt.legend()
 c =plt.pcolormesh(q_values, omega, S_qw.T/np.max(S_qw), cmap="turbo",shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
@@ -117,6 +129,6 @@ plt.xticks(
 )
 plt.ylim(0.0, 3.5)
 plt.tight_layout()
-plt.title("Dynamical structure factor L=8 ED")
-plt.savefig("sqw_ed_L8.png", dpi=300, bbox_inches="tight")
+plt.title("Dynamical structure factor L=10 ED")
+plt.savefig("sqw_ed_L10.png", dpi=300, bbox_inches="tight")
 plt.show()

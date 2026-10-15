@@ -40,55 +40,56 @@ plt.rcParams.update({
 })
 
 # Heisenberg Hamiltonian
-L = 64
+L = 10
 J = 1.0
 H = qtn.MPO_ham_heis(L,j=J,cyclic=False)    # HeisenbergハミルトニアンをMPO形式で作る。周期境界条件にせず、両端を結ばない。OBC（開境界条件）
 
+max_bond = 128
 c = L // 2      # サイト中央
-t_max = 20
-dt = 0.05
+t_max = 6
+dt = 0.6
 
 
-# # 2サイトDMRG
-# dmrg = qtn.DMRG2(H,bond_dims=[40, 60, 80, 100, 120],cutoffs=1e-10)  # DMRG計算を行うためのオブジェクト   # ボンド次元の上限を順番に変える。異なるボンド次元でエネルギーが変わらないかで収束を判定
-# dmrg.solve(tol=1e-8,verbosity=1)    # tolは収束判定の許容誤差を指定
+# 2サイトDMRG, ボンド上限をだんだん増やし、最終的にはtruncation errorが1e-10になるようなボンド次元にする
+dmrg = qtn.DMRG2(H,bond_dims=[40, 60, 80, 100, 120], cutoffs=1e-10)  # DMRG計算を行うためのオブジェクト   # ボンド次元の上限を順番に変える。異なるボンド次元でエネルギーが変わらないかで収束を判定
+dmrg.solve(tol=1e-8,verbosity=1)    # tolは収束判定の許容誤差を指定
 
-# # Ground state
-# psi0 = dmrg.state
-# E0 = dmrg.energy
-# print("Ground-state energy =", E0)
-# print("Energy per site      =", E0 / L)
+# Ground state
+psi0 = dmrg.state
+E0 = dmrg.energy
+print("Ground-state energy =", E0)
+print("Energy per site      =", E0 / L)
 
 
-# # TEBDでG(n,c,t)を求める     15ページ参照
-# Sz = qu.spin_operator("z")
-# psi_exc = psi0.copy()
-# phi_0 = psi_exc.gate_(Sz, where=c, contract=True)       # |φ(0)⟩ = Sᶻc|ψ₀⟩
+# TEBDでG(n,c,t)を求める     15ページ参照
+Sz = qu.spin_operator("z")
+psi_exc = psi0.copy()
+phi_0 = psi_exc.gate_(Sz, where=c, contract=True)       # |φ(0)⟩ = Sᶻc|ψ₀⟩
 
-# H_tebd = qtn.ham_1d_heis(L, j=J, cyclic=False)      # まずは1次元Heisenberg鎖のハミルトニアンを用意
-# tebd = qtn.TEBD(phi_0, H_tebd, dt=dt, split_opts={"max_bond": 128, "cutoff": 1e-10}, progbar=True)   # phi0 や H_tebd などを保持し、TEBD計算を行うためのオブジェクト
-# times = np.arange(0, t_max + dt, dt)                 # 等間隔の時刻の配列を生成
-# states = tebd.at_times(times, order=2)               # 2次のSuzuki-Trotter分解を使って時間発展を近似
+H_tebd = qtn.ham_1d_heis(L, j=J, cyclic=False)      # まずは1次元Heisenberg鎖のハミルトニアンを用意
+tebd = qtn.TEBD(phi_0, H_tebd, dt=dt, split_opts={"max_bond": max_bond, "cutoff": 1e-10}, progbar=True)   # phi0 や H_tebd などを保持し、TEBD計算を行うためのオブジェクト
+times = np.arange(0, t_max + dt, dt)                 # 等間隔の時刻の配列を生成
+states = tebd.at_times(times, order=2)               # 2次のSuzuki-Trotter分解を使って時間発展を近似
 
-# # 時間ごとにG(n,t)を計算　ただし中心はc = L / 2
-# G = np.zeros((L, len(times)), dtype=complex)
-# for it in range(len(times)):
-#     t = times[it]
-#     phi_t = next(states)                                        # |φ(t)⟩ = U(t)|φ(0)⟩
-#     for n in range(L):
-#         phi_tmp = phi_t.copy()
-#         phi_tmp.gate_(Sz, where=n)                              # Sᶻc|φ(t)⟩
-#         G[n, it] = np.exp(1j * E0 * t) * (psi0.H @ phi_tmp)     # G(n,c,t) = e^iE0t <psi0| Sᶻc|φ(t)⟩
+# 時間ごとにG(n,t)を計算　ただし中心はc = L / 2
+G = np.zeros((L, len(times)), dtype=complex)
+for it in range(len(times)):
+    t = times[it]
+    phi_t = next(states)                                        # |φ(t)⟩ = U(t)|φ(0)⟩
+    for n in range(L):
+        phi_tmp = phi_t.copy()
+        phi_tmp.gate_(Sz, where=n)                              # Sᶻc|φ(t)⟩
+        G[n, it] = np.exp(1j * E0 * t) * (psi0.H @ phi_tmp)     # G(n,c,t) = e^iE0t <psi0| Sᶻc|φ(t)⟩
 
 # # DMRG・TEBDで計算した結果を保存
-# np.savez("correlation.npz", G=G, times=times, E0=E0)
+# np.savez("correlation_L10.npz", G=G, times=times, E0=E0)
 
 
-# 保存した結果を読み込む、ここからフーリエ変換する
-data = np.load("correlation.npz")
-G = data["G"]
-times = data["times"]
-E0 = float(data["E0"])
+# # 保存した結果を読み込む、ここからフーリエ変換する
+# data = np.load("correlation_L64.npz")
+# G = data["G"]
+# times = data["times"]
+# E0 = float(data["E0"])
 
 # G(r,t) のパワープロット（光円錐）
 r = np.arange(L) - c
@@ -109,30 +110,32 @@ plt.colorbar().set_label(r"$G(r,t)$", fontsize=16)
 plt.xlim(-L // 2, L // 2)
 plt.ylim(0, t_max)
 plt.tight_layout()
-plt.title("Correlation_lightcone L=64 TEBD")
-plt.savefig("correlation_lightcone.png", dpi=300, bbox_inches="tight")
+plt.title(f"Correlation_lightcone L{L} TEBD")
+plt.savefig(f"correlation_lightcone_L{L}.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
+n_points_momentum, n_points_frequency = 100, 100
 
-# Spatial Fourier transformでG(q,t)を作る
+#Spatial Fourier transformでG(q,t)を作る
 r = np.arange(L) - c
-q_vals = np.linspace(0, 2 * np.pi, 2 * L + 1)
+#q_vals = np.linspace(0, 2 * np.pi, 2 * L + 1)
+q_vals = np.linspace(0, 2 * np.pi, n_points_momentum)
 Gqt = np.zeros((len(q_vals), len(times)), dtype=complex)
 for iq in range(len(q_vals)):
     q = q_vals[iq]
 
-    Gqt[iq, :] = np.sum(np.exp(-1j * q * r[:, None]) * G,axis=0)
+    Gqt[iq, :] = G[0, :] + 2 * np.sum(np.cos(q * r[1:, None]) * G[1:, :],axis=0)
 
-# Time Eourier transform
+# Time Eourier transform with Gaussian window
 dt_obs = dt 
-
-# Gaussian window
 sigma_t = t_max / 3
 window = np.exp(-times**2 / (2 * sigma_t**2))
 Gqt_windowed = Gqt * window[None, :]
 
-omega_vals = np.linspace(0, 4, 400)
+# omega_vals = np.linspace(0, 4, 400)
+#omega_vals = np.linspace(0, np.pi / dt_obs, n_points_frequency)
+omega_vals = np.linspace(0, 4, n_points_frequency)
 Sqw = np.zeros((len(q_vals), len(omega_vals)))
 
 for iq in range(len(q_vals)):
@@ -141,18 +144,24 @@ for iq in range(len(q_vals)):
 
         Sqw[iq, iw] = dt_obs / (2 * np.pi) * (Gqt_windowed[iq, 0] + 2 * np.real(np.sum(Gqt_windowed[iq, 1:]* np.exp(1j * omega * times[1:]))))
 
-
 iq = np.argmin(np.abs(q_vals - np.pi / 2))
 plt.figure(figsize=(8, 5))
 plt.plot(omega_vals, Sqw[iq, :])
 plt.xlabel(r"$\omega/J$")
 plt.ylabel(r"$S(\pi/2,\omega)$")
 plt.tight_layout()
-plt.savefig("sw_tebd.png", dpi=300, bbox_inches="tight")
+plt.savefig(f"sw_tebd_L{L}.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
 plt.figure(figsize=(8, 5))
+# Exact lower-bound dispersion of the 1D Heisenberg model
+q_exact = np.linspace(0, 2 * np.pi, 500)
+omega_exact1 = np.pi * J * np.abs(np.sin(q_exact / 2))
+omega_exact2 = np.pi * J / 2 * np.abs(np.sin(q_exact))
+plt.plot(q_exact,omega_exact1, "b-", linewidth=1.8, label=r"$\omega_{\mathrm{U}}(q)=\pi J|sin\frac{q}{2}|$")
+plt.plot(q_exact,omega_exact2, "y-", linewidth=1.8, label=r"$\omega_{\mathrm{L}}(q)=\frac{\pi J}{2}|\sin q|$")
+plt.legend()
 c = plt.pcolormesh(q_vals, omega_vals, Sqw.T/np.max(Sqw), cmap="turbo", shading="auto")
 plt.xlabel(r"$q$")
 plt.ylabel(r"$\omega/J$")
@@ -170,6 +179,6 @@ plt.xticks(
 )
 plt.ylim(0.0, 3.5)
 plt.tight_layout()
-plt.title("Dynamical structure factor L=64 TEBD")
-plt.savefig("sqw_tebd_L64.png", dpi=300, bbox_inches="tight")
+plt.title(f"DSF L={L}, maxbond={max_bond}, tmax={t_max}, dt={dt}, TEBD")
+plt.savefig(f"sqw_tebd_L{L}, maxbond={max_bond}, tmax={t_max}, dt={dt}.png", dpi=300, bbox_inches="tight")
 plt.show()
